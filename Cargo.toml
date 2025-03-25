@@ -1,0 +1,9 @@
+[package]
+name = "musicbrainz-rss-generator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+musicbrainz_rs = "0.9.1"
+rss = "2.0.12"
+tokio = "1.44.1"
