@@ -1,4 +1,6 @@
-use musicbrainz_rs::entity::release_group::ReleaseGroup;
+use musicbrainz_rs::entity::release_group::{
+    ReleaseGroup, ReleaseGroupPrimaryType, ReleaseGroupSecondaryType,
+};
 use musicbrainz_rs::prelude::*;
 use rss::{ChannelBuilder, GuidBuilder, ItemBuilder};
 use std::cmp::Reverse;
@@ -67,11 +69,44 @@ async fn main() -> Result<(), String> {
             }
         }
 
+        let mut types = Vec::new();
+        match item.primary_type.clone() {
+            None => {}
+            Some(primary_type) => match primary_type {
+                ReleaseGroupPrimaryType::Album => types.push("Album"),
+                ReleaseGroupPrimaryType::Single => types.push("Single"),
+                ReleaseGroupPrimaryType::Ep => types.push("EP"),
+                ReleaseGroupPrimaryType::Broadcast => types.push("Broadcast"),
+                _ => {}
+            },
+        }
+        for secondary_type in item.secondary_types.clone() {
+            match secondary_type {
+                ReleaseGroupSecondaryType::AudioDrama => types.push("Audio drama"),
+                ReleaseGroupSecondaryType::Audiobook => types.push("Audiobook"),
+                ReleaseGroupSecondaryType::Compilation => types.push("Compilation"),
+                ReleaseGroupSecondaryType::DjMix => types.push("DJ-mix"),
+                ReleaseGroupSecondaryType::Demo => types.push("Demo"),
+                ReleaseGroupSecondaryType::Interview => types.push("Interview"),
+                ReleaseGroupSecondaryType::Live => types.push("Live"),
+                ReleaseGroupSecondaryType::MixtapeStreet => types.push("Mixtape/Street"),
+                ReleaseGroupSecondaryType::Remix => types.push("Remix"),
+                ReleaseGroupSecondaryType::Soundtrack => types.push("Soundtrack"),
+                ReleaseGroupSecondaryType::Spokenword => types.push("Spokenword"),
+                _ => {}
+            }
+        }
+
+        let mut title = format!("{}: {}", author, item.title);
+        if types.len() > 0 {
+            title = format!("{} ({})", title, types.join("; "))
+        }
+
         let mut binding = ItemBuilder::default();
         let item_builder = binding
             .guid(GuidBuilder::default().value(link.clone()).build())
             .link(link)
-            .title(format!("{}: {}", author, item.title))
+            .title(title)
             .author(author);
 
         match item.first_release_date {
