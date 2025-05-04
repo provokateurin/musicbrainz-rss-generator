@@ -1,3 +1,4 @@
+use chrono::{DurationRound, TimeDelta, Utc};
 use musicbrainz_rs::entity::release_group::{
     ReleaseGroup, ReleaseGroupPrimaryType, ReleaseGroupSecondaryType,
 };
@@ -9,6 +10,11 @@ use std::io;
 
 #[tokio::main]
 async fn main() -> Result<(), String> {
+    let now = Utc::now()
+        .duration_trunc(TimeDelta::days(1))
+        .unwrap()
+        .date_naive();
+
     let mut binding = ChannelBuilder::default();
     let channel_builder = binding
         .title("MusicBrainz Releases")
@@ -42,7 +48,12 @@ async fn main() -> Result<(), String> {
             };
 
             for release_group in release_groups.entities.clone() {
-                keyed_items.insert(release_group.clone().id, release_group);
+                if release_group
+                    .first_release_date
+                    .is_none_or(|first_release_date| first_release_date > now)
+                {
+                    keyed_items.insert(release_group.clone().id, release_group);
+                }
             }
 
             offset += release_groups.entities.len() as u16;

@@ -774,6 +774,7 @@ dependencies = [
 name = "musicbrainz-rss-generator"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "musicbrainz_rs",
  "rss",
  "tokio",
